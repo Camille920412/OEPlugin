@@ -97,7 +97,36 @@ extern "C" EXPORT int getPluginInfo(int index, Plugin::PluginInfo* info)
 		break;
 	}
 	return 0;
+
+	
+	void TTLEventGenerator::createEventChannels()
+{
+
+   sampleRate = getSampleRate(0);
+
+   const DataChannel* inputChannel = getDataChannel(0);
+
+   if (!inputChannel) // no input channels to this plugin
+   {
+         eventChannel = new EventChannel(EventChannel::TTL, // channel type
+                                          8, // number of bits (up to 65536)
+                                          1, // data packet size
+                                          sampleRate, // sampleRate
+                                          this) // source processor
+   } else {
+      eventChannel = new EventChannel(EventChannel::TTL, // channel type
+                                          8, // number of bits (up to 65536)
+                                          1, // data packet size
+                                          inputChannel, // pointer to input channel
+                                          this) // source processor
+   }
+
+   eventChannelArray.add(eventChannel); // eventChannelArray is an OwnedArray, which will
+                                        // delete the eventChannel object each time
+                                        // update() is called
+
 }
+
 
 #ifdef WIN32
 BOOL WINAPI DllMain(IN HINSTANCE hDllHandle,
